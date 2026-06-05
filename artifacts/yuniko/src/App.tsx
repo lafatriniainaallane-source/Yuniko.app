@@ -1,8 +1,11 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useState, useEffect } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme";
+import { motion, AnimatePresence } from "framer-motion";
 
+import SplashScreen from "@/components/SplashScreen";
 import Home from "@/pages/home";
 import Notifications from "@/pages/notifications";
 import Create from "@/pages/create";
@@ -33,7 +36,139 @@ import SettingsAbout from "@/pages/settings-about";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: false } },
+});
+
+const pageVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+};
+
+const pageTransition = {
+  duration: 0.18,
+  ease: "easeInOut" as const,
+};
+
+function AnimatedRoutes() {
+  const [location] = useLocation();
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location}
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={pageTransition}
+        className="w-full min-h-screen"
+        style={{ willChange: "opacity, transform" }}
+      >
+        <Switch>
+          {/* Main tabs */}
+          <Route path="/" component={Home} />
+          <Route path="/notifications" component={Notifications} />
+          <Route path="/create" component={Create} />
+          <Route path="/messages" component={Messages} />
+          <Route path="/profile">
+            {() => <Profile />}
+          </Route>
+
+          {/* Settings */}
+          <Route path="/settings" component={Settings} />
+          <Route path="/settings/privacy" component={SettingsPrivacy} />
+          <Route path="/settings/security" component={SettingsSecurity} />
+          <Route path="/settings/storage" component={SettingsStorage} />
+          <Route path="/settings/about" component={SettingsAbout} />
+          <Route path="/settings/account">
+            {() => <EditProfile />}
+          </Route>
+
+          {/* Profile pages */}
+          <Route path="/profile/edit" component={EditProfile} />
+          <Route path="/user/:userId">
+            {(params) => <Profile userId={params.userId} />}
+          </Route>
+          <Route path="/followers/:userId">
+            {() => <Followers mode="followers" />}
+          </Route>
+          <Route path="/following/:userId">
+            {() => <Followers mode="following" />}
+          </Route>
+
+          {/* Content */}
+          <Route path="/post/:postId" component={PostDetail} />
+          <Route path="/saved" component={Saved} />
+          <Route path="/hashtag/:tag" component={Hashtag} />
+          <Route path="/search" component={Search} />
+
+          {/* Social */}
+          <Route path="/add-friends" component={AddFriends} />
+
+          {/* Messaging */}
+          <Route path="/chat/:userId" component={Chat} />
+          <Route path="/message-requests" component={MessageRequests} />
+          <Route path="/archived-chats" component={ArchivedChats} />
+          <Route path="/call-history" component={CallHistory} />
+
+          {/* Calls */}
+          <Route path="/video-call" component={VideoCall} />
+          <Route path="/video-call/:userId" component={VideoCall} />
+          <Route path="/voice-call" component={VoiceCall} />
+          <Route path="/voice-call/:userId" component={VoiceCall} />
+
+          {/* Stories */}
+          <Route path="/story/:userId" component={Story} />
+
+          {/* Account */}
+          <Route path="/blocked-users" component={BlockedUsers} />
+          <Route path="/account/delete" component={DeleteAccount} />
+          <Route path="/account/verify">
+            {() => (
+              <div
+                className="w-full min-h-screen flex items-center justify-center"
+                style={{ background: "hsl(250, 30%, 7%)" }}
+              >
+                <div className="text-center px-6">
+                  <div
+                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{
+                      background: "linear-gradient(135deg, #FF006E, #8B00FF)",
+                      boxShadow: "0 0 40px rgba(255,0,110,0.4)",
+                    }}
+                  >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                  <h2 className="text-white font-bold text-xl mb-2">Verify Account</h2>
+                  <p className="text-white/50 text-sm mb-6">
+                    Account verification helps build trust in the community.
+                  </p>
+                  <button
+                    className="px-6 py-2.5 rounded-full text-sm font-semibold text-white"
+                    style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)" }}
+                  >
+                    Request Verification
+                  </button>
+                </div>
+              </div>
+            )}
+          </Route>
+
+          {/* Support */}
+          <Route path="/help" component={Help} />
+          <Route path="/feedback" component={Feedback} />
+
+          {/* Fallback */}
+          <Route component={NotFound} />
+        </Switch>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 function Router() {
   return (
@@ -41,107 +176,20 @@ function Router() {
       className="min-h-screen w-full dark"
       style={{ background: "hsl(250, 30%, 7%)" }}
     >
-      <Switch>
-        {/* Main tabs */}
-        <Route path="/" component={Home} />
-        <Route path="/notifications" component={Notifications} />
-        <Route path="/create" component={Create} />
-        <Route path="/messages" component={Messages} />
-        <Route path="/profile">
-          {() => <Profile />}
-        </Route>
-
-        {/* Settings */}
-        <Route path="/settings" component={Settings} />
-        <Route path="/settings/privacy" component={SettingsPrivacy} />
-        <Route path="/settings/security" component={SettingsSecurity} />
-        <Route path="/settings/storage" component={SettingsStorage} />
-        <Route path="/settings/about" component={SettingsAbout} />
-        <Route path="/settings/account">
-          {() => <EditProfile />}
-        </Route>
-
-        {/* Profile pages */}
-        <Route path="/profile/edit" component={EditProfile} />
-        <Route path="/user/:userId">
-          {(params) => <Profile userId={params.userId} />}
-        </Route>
-        <Route path="/followers/:userId">
-          {() => <Followers mode="followers" />}
-        </Route>
-        <Route path="/following/:userId">
-          {() => <Followers mode="following" />}
-        </Route>
-
-        {/* Content */}
-        <Route path="/post/:postId" component={PostDetail} />
-        <Route path="/saved" component={Saved} />
-        <Route path="/hashtag/:tag" component={Hashtag} />
-        <Route path="/search" component={Search} />
-
-        {/* Social */}
-        <Route path="/add-friends" component={AddFriends} />
-
-        {/* Messaging */}
-        <Route path="/chat/:userId" component={Chat} />
-        <Route path="/message-requests" component={MessageRequests} />
-        <Route path="/archived-chats" component={ArchivedChats} />
-        <Route path="/call-history" component={CallHistory} />
-
-        {/* Calls */}
-        <Route path="/video-call" component={VideoCall} />
-        <Route path="/video-call/:userId" component={VideoCall} />
-        <Route path="/voice-call" component={VoiceCall} />
-        <Route path="/voice-call/:userId" component={VoiceCall} />
-
-        {/* Stories */}
-        <Route path="/story/:userId" component={Story} />
-
-        {/* Account */}
-        <Route path="/blocked-users" component={BlockedUsers} />
-        <Route path="/account/delete" component={DeleteAccount} />
-        <Route path="/account/verify">
-          {() => (
-            <div className="w-full min-h-screen flex items-center justify-center" style={{ background: "hsl(250, 30%, 7%)" }}>
-              <div className="text-center px-6">
-                <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)", boxShadow: "0 0 40px rgba(124,58,237,0.4)" }}
-                >
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-                <h2 className="text-white font-bold text-xl mb-2">Verify Account</h2>
-                <p className="text-white/50 text-sm mb-6">Account verification helps build trust in the community.</p>
-                <button
-                  className="px-6 py-2.5 rounded-full text-sm font-semibold text-white"
-                  style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
-                >
-                  Request Verification
-                </button>
-              </div>
-            </div>
-          )}
-        </Route>
-
-        {/* Support */}
-        <Route path="/help" component={Help} />
-        <Route path="/feedback" component={Feedback} />
-
-        {/* Fallback */}
-        <Route component={NotFound} />
-      </Switch>
+      <AnimatedRoutes />
     </div>
   );
 }
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
             <Router />
           </WouterRouter>
         </ThemeProvider>

@@ -39,6 +39,8 @@ export interface Post {
   isSaved: boolean;
   location?: string;
   isVideo?: boolean;
+  isSponsored?: boolean;
+  sponsorCta?: string;
 }
 
 export interface Comment {
@@ -238,7 +240,44 @@ export const users: User[] = [
   },
 ];
 
-export const allUsers: User[] = [currentUser, ...users];
+const sponsorUsers: User[] = [
+  {
+    id: "sp1",
+    username: "nike",
+    displayName: "Nike",
+    avatar: "https://picsum.photos/seed/nike_brand/200/200",
+    bio: "Just Do It. ✓",
+    location: "Beaverton, OR 🇺🇸",
+    flag: "🇺🇸",
+    verified: true,
+    followers: 5200000,
+    following: 0,
+    posts: 4200,
+    isOnline: false,
+    coverPhoto: "https://picsum.photos/seed/nike_cover/800/400",
+    isFollowing: false,
+    isFriend: false,
+  },
+  {
+    id: "sp2",
+    username: "samsung_official",
+    displayName: "Samsung",
+    avatar: "https://picsum.photos/seed/samsung_brand/200/200",
+    bio: "Do What You Can't 📱",
+    location: "Seoul, South Korea 🇰🇷",
+    flag: "🇰🇷",
+    verified: true,
+    followers: 8900000,
+    following: 0,
+    posts: 6800,
+    isOnline: false,
+    coverPhoto: "https://picsum.photos/seed/samsung_cover/800/400",
+    isFollowing: false,
+    isFriend: false,
+  },
+];
+
+export const allUsers: User[] = [currentUser, ...users, ...sponsorUsers];
 
 export const getUserById = (id: string): User | undefined =>
   allUsers.find((u) => u.id === id);
@@ -371,6 +410,54 @@ export const posts: Post[] = [
     isSaved: false,
   },
 ];
+
+export const sponsoredPosts: Post[] = [
+  {
+    id: "ad1",
+    userId: "sp1",
+    imageUrl: "https://picsum.photos/seed/sponsor_ad1/600/900",
+    caption: "Step into the future of performance. Our latest collection is here. 💪",
+    hashtags: ["#JustDoIt", "#Nike", "#Sport"],
+    likes: 145200,
+    comments: 3240,
+    shares: 28900,
+    saves: 12400,
+    timestamp: "Sponsored",
+    isLiked: false,
+    isSaved: false,
+    isSponsored: true,
+    sponsorCta: "Shop Now",
+  },
+  {
+    id: "ad2",
+    userId: "sp2",
+    imageUrl: "https://picsum.photos/seed/sponsor_ad2/600/900",
+    caption: "See the world in a whole new way. Galaxy S25 Ultra. 📱✨",
+    hashtags: ["#Samsung", "#GalaxyS25", "#DoWhatYouCant"],
+    likes: 289700,
+    comments: 8900,
+    shares: 42100,
+    saves: 18700,
+    timestamp: "Sponsored",
+    isLiked: false,
+    isSaved: false,
+    isSponsored: true,
+    sponsorCta: "Learn More",
+  },
+];
+
+export const getFeedWithAds = (): Post[] => {
+  const result: Post[] = [];
+  const adPositions = [2, 5];
+  let adIndex = 0;
+  posts.forEach((post, i) => {
+    result.push(post);
+    if (adPositions.includes(i + 1) && adIndex < sponsoredPosts.length) {
+      result.push(sponsoredPosts[adIndex++]);
+    }
+  });
+  return result;
+};
 
 export const getPostsByUser = (userId: string) =>
   posts.filter((p) => p.userId === userId);

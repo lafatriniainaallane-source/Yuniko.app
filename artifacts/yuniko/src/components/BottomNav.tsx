@@ -1,6 +1,10 @@
 import { useLocation, Link } from "wouter";
 import { Home, Bell, Plus, MessageCircle, User } from "lucide-react";
+import { motion } from "framer-motion";
 import { t } from "@/lib/i18n";
+
+const ACTIVE_COLOR = "#FF3D9A";
+const INACTIVE_COLOR = "rgba(255,255,255,0.45)";
 
 export default function BottomNav() {
   const [location] = useLocation();
@@ -14,117 +18,106 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50"
       style={{
-        background: "rgba(13,11,20,0.92)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(139,92,246,0.18)",
+        background: "rgba(10,8,18,0.95)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderTop: "1px solid rgba(255,61,154,0.15)",
       }}
       data-testid="bottom-nav"
     >
       <div className="flex items-center justify-around h-16 px-2">
-        <Link href="/">
-          <button
-            data-testid="nav-home"
-            className="flex flex-col items-center gap-0.5 min-w-[44px] py-1 relative"
-          >
-            <Home
-              size={22}
-              className={isActive("/") ? "text-purple-400" : "text-white/50"}
-              strokeWidth={isActive("/") ? 2.2 : 1.7}
-            />
-            <span
-              className={`text-[10px] font-medium ${isActive("/") ? "text-purple-400" : "text-white/40"}`}
-            >
-              {t("home")}
-            </span>
-            {isActive("/") && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-500" />
-            )}
-          </button>
-        </Link>
+        <NavItem href="/" label={t("home")} active={isActive("/")}>
+          <Home
+            size={23}
+            style={{ color: isActive("/") ? ACTIVE_COLOR : INACTIVE_COLOR }}
+            strokeWidth={isActive("/") ? 2.3 : 1.7}
+          />
+        </NavItem>
 
-        <Link href="/notifications">
-          <button
-            data-testid="nav-notifications"
-            className="flex flex-col items-center gap-0.5 min-w-[44px] py-1 relative"
-          >
-            <Bell
-              size={22}
-              className={isActive("/notifications") ? "text-purple-400" : "text-white/50"}
-              strokeWidth={isActive("/notifications") ? 2.2 : 1.7}
-            />
-            <span
-              className={`text-[10px] font-medium ${isActive("/notifications") ? "text-purple-400" : "text-white/40"}`}
-            >
-              {t("notifications")}
-            </span>
-            {isActive("/notifications") && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-500" />
-            )}
-          </button>
-        </Link>
+        <NavItem href="/notifications" label={t("notifications")} active={isActive("/notifications")}>
+          <Bell
+            size={23}
+            style={{ color: isActive("/notifications") ? ACTIVE_COLOR : INACTIVE_COLOR }}
+            strokeWidth={isActive("/notifications") ? 2.3 : 1.7}
+          />
+        </NavItem>
 
         <Link href="/create">
-          <button
+          <motion.button
             data-testid="nav-create"
-            className="flex items-center justify-center w-12 h-12 rounded-full relative"
+            className="flex items-center justify-center w-[54px] h-[54px] rounded-full"
             style={{
-              background: "linear-gradient(135deg, #7C3AED, #4F46E5)",
-              boxShadow: "0 0 20px rgba(124,58,237,0.5)",
+              background: "linear-gradient(135deg, #FF006E, #8B00FF)",
+              boxShadow: "0 0 24px rgba(255,0,110,0.5), 0 4px 16px rgba(0,0,0,0.3)",
             }}
+            whileTap={{ scale: 0.88 }}
+            whileHover={{ scale: 1.05 }}
           >
-            <Plus size={24} className="text-white" strokeWidth={2.5} />
-          </button>
+            <Plus size={26} className="text-white" strokeWidth={2.8} />
+          </motion.button>
         </Link>
 
-        <Link href="/messages">
-          <button
-            data-testid="nav-messages"
-            className="flex flex-col items-center gap-0.5 min-w-[44px] py-1 relative"
-          >
-            <div className="relative">
-              <MessageCircle
-                size={22}
-                className={isActive("/messages") ? "text-purple-400" : "text-white/50"}
-                strokeWidth={isActive("/messages") ? 2.2 : 1.7}
-              />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-purple-500 text-white text-[9px] flex items-center justify-center font-bold">
-                3
-              </span>
-            </div>
-            <span
-              className={`text-[10px] font-medium ${isActive("/messages") ? "text-purple-400" : "text-white/40"}`}
-            >
-              {t("messages")}
-            </span>
-            {isActive("/messages") && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-500" />
-            )}
-          </button>
-        </Link>
-
-        <Link href="/profile">
-          <button
-            data-testid="nav-profile"
-            className="flex flex-col items-center gap-0.5 min-w-[44px] py-1 relative"
-          >
-            <User
-              size={22}
-              className={isActive("/profile") ? "text-purple-400" : "text-white/50"}
-              strokeWidth={isActive("/profile") ? 2.2 : 1.7}
+        <NavItem href="/messages" label={t("messages")} active={isActive("/messages")}>
+          <div className="relative">
+            <MessageCircle
+              size={23}
+              style={{ color: isActive("/messages") ? ACTIVE_COLOR : INACTIVE_COLOR }}
+              strokeWidth={isActive("/messages") ? 2.3 : 1.7}
             />
             <span
-              className={`text-[10px] font-medium ${isActive("/profile") ? "text-purple-400" : "text-white/40"}`}
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-white text-[9px] flex items-center justify-center font-bold"
+              style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)" }}
             >
-              {t("profile")}
+              3
             </span>
-            {isActive("/profile") && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-500" />
-            )}
-          </button>
-        </Link>
+          </div>
+        </NavItem>
+
+        <NavItem href="/profile" label={t("profile")} active={isActive("/profile")}>
+          <User
+            size={23}
+            style={{ color: isActive("/profile") ? ACTIVE_COLOR : INACTIVE_COLOR }}
+            strokeWidth={isActive("/profile") ? 2.3 : 1.7}
+          />
+        </NavItem>
       </div>
       <div className="h-safe-area-inset-bottom" />
     </nav>
+  );
+}
+
+function NavItem({
+  href,
+  label,
+  active,
+  children,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link href={href}>
+      <motion.button
+        className="flex flex-col items-center gap-0.5 min-w-[44px] py-1 relative"
+        whileTap={{ scale: 0.88 }}
+      >
+        {children}
+        <span
+          className="text-[10px] font-medium"
+          style={{ color: active ? ACTIVE_COLOR : "rgba(255,255,255,0.38)" }}
+        >
+          {label}
+        </span>
+        {active && (
+          <motion.span
+            layoutId="nav-dot"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+            style={{ background: ACTIVE_COLOR }}
+          />
+        )}
+      </motion.button>
+    </Link>
   );
 }
