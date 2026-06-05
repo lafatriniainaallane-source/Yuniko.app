@@ -67,7 +67,7 @@ export default function StoryViewer() {
       <div className="w-full max-w-[430px] mx-auto min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-white/50">{t("noStories")}</p>
-          <button onClick={() => setLocation("/")} className="mt-4 text-purple-400">{t("back")}</button>
+          <button onClick={() => setLocation("/")} className="mt-4" style={{ color: "#FF3D9A" }}>{t("back")}</button>
         </div>
       </div>
     );
@@ -128,7 +128,7 @@ export default function StoryViewer() {
             src={user.avatar}
             alt={user.displayName}
             className="w-9 h-9 rounded-full object-cover"
-            style={{ border: "2px solid rgba(139,92,246,0.8)" }}
+            style={{ border: "2px solid rgba(255,0,110,0.8)" }}
           />
           <div>
             <div className="flex items-center gap-1">
@@ -159,7 +159,7 @@ export default function StoryViewer() {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span
             className="text-7xl animate-bounce"
-            style={{ filter: "drop-shadow(0 0 20px rgba(139,92,246,0.8))" }}
+            style={{ filter: "drop-shadow(0 0 20px rgba(255,0,110,0.8))" }}
           >
             {reactionShown}
           </span>
@@ -212,7 +212,7 @@ export default function StoryViewer() {
               setReplyText("");
             }}
             className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+            style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 2px 10px rgba(255,0,110,0.4)" }}
             data-testid="btn-send-reply"
           >
             <Send size={16} className="text-white" />

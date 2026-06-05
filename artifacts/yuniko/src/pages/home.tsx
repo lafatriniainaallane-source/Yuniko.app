@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { Search, UserPlus, Globe, ChevronDown, Bookmark, Share2, Flag, EyeOff, WifiOff } from "lucide-react";
+import { Search, UserPlus, Globe, ChevronDown, Bookmark, Share2, Flag, EyeOff, WifiOff, Radio } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { stories, getFeedWithAds } from "@/data/mockData";
 import StoryAvatar from "@/components/StoryAvatar";
@@ -154,6 +154,26 @@ export default function Home() {
           style={{ WebkitOverflowScrolling: "touch" }}
         >
           <StoryAvatar userId="me" isOwn />
+          {/* Go Live button */}
+          <button
+            onClick={() => setLocation("/live")}
+            className="flex-shrink-0 flex flex-col items-center gap-1.5"
+            data-testid="btn-go-live-stories"
+          >
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center relative"
+              style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 0 16px rgba(255,0,110,0.45)" }}
+            >
+              <Radio size={22} className="text-white" />
+              <div
+                className="absolute -top-0.5 -right-0.5 px-1 py-0.5 rounded-full text-[8px] font-bold text-white leading-none"
+                style={{ background: "#FF006E" }}
+              >
+                LIVE
+              </div>
+            </div>
+            <span className="text-white/60 text-[10px] font-medium">Go Live</span>
+          </button>
           {stories.map((story) => (
             <StoryAvatar
               key={story.id}

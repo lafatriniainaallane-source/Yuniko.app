@@ -68,7 +68,7 @@ export default function VoiceCall() {
         {/* Avatar */}
         <div
           className="w-28 h-28 rounded-full p-[3px] mb-5"
-          style={{ background: "linear-gradient(135deg, #8B5CF6, #4F46E5)", boxShadow: "0 0 40px rgba(139,92,246,0.5)" }}
+          style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 0 40px rgba(255,0,110,0.5)" }}
         >
           <img
             src={user.avatar}
@@ -87,7 +87,7 @@ export default function VoiceCall() {
         {/* Status */}
         <p
           className="text-sm font-medium mb-1"
-          style={{ color: callState === "active" ? "#A78BFA" : "rgba(255,255,255,0.5)" }}
+          style={{ color: callState === "active" ? "#FF3D9A" : "rgba(255,255,255,0.5)" }}
         >
           {callState === "connecting" ? t("calling") : formatDuration(callDuration)}
         </p>
@@ -97,8 +97,9 @@ export default function VoiceCall() {
             {[0, 1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="w-0.5 rounded-full bg-purple-400/60"
+                className="w-0.5 rounded-full"
                 style={{
+                  background: "rgba(255,61,154,0.6)",
                   height: 4 + Math.random() * 16,
                   animation: `pulse ${0.4 + i * 0.1}s ease-in-out infinite alternate`,
                 }}
@@ -157,7 +158,7 @@ function CallBtn({
       <div
         className="w-12 h-12 rounded-full flex items-center justify-center"
         style={{
-          background: active ? "rgba(255,255,255,0.15)" : "rgba(139,92,246,0.3)",
+          background: active ? "rgba(255,255,255,0.15)" : "rgba(255,0,110,0.2)",
           border: "1px solid rgba(255,255,255,0.12)",
         }}
       >

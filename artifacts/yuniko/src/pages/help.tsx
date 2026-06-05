@@ -12,10 +12,10 @@ const FAQ = [
 ];
 
 const TOPICS = [
-  { icon: Book, label: "Getting Started", color: "#8B5CF6" },
-  { icon: Shield, label: "Privacy & Safety", color: "#6366F1" },
-  { icon: MessageCircle, label: "Messages & Calls", color: "#4F46E5" },
-  { icon: AlertTriangle, label: "Reporting Issues", color: "#7C3AED" },
+  { icon: Book, label: "Getting Started", color: "#FF3D9A" },
+  { icon: Shield, label: "Privacy & Safety", color: "#B054FF" },
+  { icon: MessageCircle, label: "Messages & Calls", color: "#FF6EB4" },
+  { icon: AlertTriangle, label: "Reporting Issues", color: "#FF9A3C" },
 ];
 
 export default function Help() {
@@ -38,9 +38,9 @@ export default function Help() {
         {/* Hero */}
         <div
           className="rounded-2xl p-5 mb-5 text-center"
-          style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(79,70,229,0.2))", border: "1px solid rgba(139,92,246,0.25)" }}
+          style={{ background: "rgba(255,0,110,0.08)", border: "1px solid rgba(255,0,110,0.2)" }}
         >
-          <HelpCircle size={36} className="text-purple-400 mx-auto mb-2" />
+          <HelpCircle size={36} style={{ color: "#FF3D9A" }} className="mx-auto mb-2" />
           <h2 className="text-white font-bold text-lg mb-1">How can we help?</h2>
           <p className="text-white/50 text-sm">Find answers, contact support, and learn about Yuniko</p>
         </div>
@@ -85,7 +85,7 @@ export default function Help() {
           <button
             onClick={() => setLocation("/feedback")}
             className="px-6 py-2 rounded-full text-sm font-semibold text-white"
-            style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+            style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 2px 10px rgba(255,0,110,0.3)" }}
             data-testid="btn-contact-support"
           >
             Contact Support

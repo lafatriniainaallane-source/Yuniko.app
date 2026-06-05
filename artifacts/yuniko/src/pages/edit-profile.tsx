@@ -32,7 +32,7 @@ export default function EditProfile() {
         <button
           onClick={handleSave}
           className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold text-white"
-          style={{ background: saved ? "rgba(134,239,172,0.2)" : "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+          style={{ background: saved ? "rgba(134,239,172,0.2)" : "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)", boxShadow: saved ? "none" : "0 2px 10px rgba(255,0,110,0.35)" }}
           data-testid="btn-save-profile"
         >
           {saved ? <><Check size={14} /> Saved</> : t("saveChanges")}
@@ -40,7 +40,7 @@ export default function EditProfile() {
       </header>
 
       {/* Cover photo */}
-      <div className="relative h-28 bg-gradient-to-br from-purple-900/50 to-indigo-900/50 overflow-hidden">
+      <div className="relative h-28 overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(255,0,110,0.4), rgba(139,0,255,0.4))" }}>
         <img src={currentUser.coverPhoto} alt="Cover" className="w-full h-full object-cover opacity-70" />
         <button
           className="absolute inset-0 flex items-center justify-center"
@@ -57,7 +57,7 @@ export default function EditProfile() {
       {/* Avatar */}
       <div className="flex justify-center -mt-8 mb-4">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full p-[2.5px]" style={{ background: "linear-gradient(135deg, #8B5CF6, #4F46E5)" }}>
+          <div className="w-20 h-20 rounded-full p-[2.5px]" style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 0 20px rgba(255,0,110,0.4)" }}>
             <img src={currentUser.avatar} alt={currentUser.displayName} className="w-full h-full rounded-full object-cover" style={{ border: "2.5px solid #0D0B14" }} />
           </div>
           <button

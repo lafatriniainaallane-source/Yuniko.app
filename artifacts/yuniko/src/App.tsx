@@ -34,6 +34,8 @@ import SettingsSecurity from "@/pages/settings-security";
 import SettingsStorage from "@/pages/settings-storage";
 import SettingsAbout from "@/pages/settings-about";
 import Settings from "@/pages/settings";
+import Login from "@/pages/login";
+import Live from "@/pages/live";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -41,15 +43,12 @@ const queryClient = new QueryClient({
 });
 
 const pageVariants = {
-  initial: { opacity: 0, y: 8 },
+  initial: { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -8 },
+  exit: { opacity: 0, y: -6 },
 };
 
-const pageTransition = {
-  duration: 0.18,
-  ease: "easeInOut" as const,
-};
+const pageTransition = { duration: 0.16, ease: "easeInOut" as const };
 
 function AnimatedRoutes() {
   const [location] = useLocation();
@@ -67,6 +66,9 @@ function AnimatedRoutes() {
         style={{ willChange: "opacity, transform" }}
       >
         <Switch>
+          {/* Auth */}
+          <Route path="/login" component={Login} />
+
           {/* Main tabs */}
           <Route path="/" component={Home} />
           <Route path="/notifications" component={Notifications} />
@@ -122,18 +124,18 @@ function AnimatedRoutes() {
           {/* Stories */}
           <Route path="/story/:userId" component={Story} />
 
+          {/* Live */}
+          <Route path="/live" component={Live} />
+
           {/* Account */}
           <Route path="/blocked-users" component={BlockedUsers} />
           <Route path="/account/delete" component={DeleteAccount} />
           <Route path="/account/verify">
             {() => (
-              <div
-                className="w-full min-h-screen flex items-center justify-center"
-                style={{ background: "hsl(250, 30%, 7%)" }}
-              >
-                <div className="text-center px-6">
+              <div className="w-full max-w-[430px] mx-auto min-h-screen bg-background flex items-center justify-center px-6">
+                <div className="text-center">
                   <div
-                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
+                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
                     style={{
                       background: "linear-gradient(135deg, #FF006E, #8B00FF)",
                       boxShadow: "0 0 40px rgba(255,0,110,0.4)",
@@ -144,12 +146,12 @@ function AnimatedRoutes() {
                     </svg>
                   </div>
                   <h2 className="text-white font-bold text-xl mb-2">Verify Account</h2>
-                  <p className="text-white/50 text-sm mb-6">
-                    Account verification helps build trust in the community.
+                  <p className="text-white/50 text-sm mb-6 leading-relaxed">
+                    Verification helps your followers know your account is authentic.
                   </p>
                   <button
-                    className="px-6 py-2.5 rounded-full text-sm font-semibold text-white"
-                    style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)" }}
+                    className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
+                    style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 4px 16px rgba(255,0,110,0.4)" }}
                   >
                     Request Verification
                   </button>
@@ -172,10 +174,7 @@ function AnimatedRoutes() {
 
 function Router() {
   return (
-    <div
-      className="min-h-screen w-full dark"
-      style={{ background: "hsl(250, 30%, 7%)" }}
-    >
+    <div className="yuniko-root">
       <AnimatedRoutes />
     </div>
   );

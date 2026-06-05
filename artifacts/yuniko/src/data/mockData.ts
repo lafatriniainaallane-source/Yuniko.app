@@ -14,6 +14,7 @@ export interface User {
   coverPhoto: string;
   isFollowing: boolean;
   isFriend: boolean;
+  website?: string;
 }
 
 export interface Story {

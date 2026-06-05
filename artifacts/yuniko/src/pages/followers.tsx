@@ -42,8 +42,9 @@ export default function Followers({ mode = "followers" }: { mode?: "followers" |
               onClick={(e) => e.stopPropagation()}
               className="px-4 py-1.5 rounded-full text-sm font-semibold text-white flex-shrink-0"
               style={{
-                background: u.isFollowing ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #7C3AED, #4F46E5)",
+                background: u.isFollowing ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)",
                 border: u.isFollowing ? "1px solid rgba(255,255,255,0.15)" : "none",
+                boxShadow: u.isFollowing ? "none" : "0 2px 8px rgba(255,0,110,0.3)",
               }}
               data-testid={`btn-follow-${u.id}`}
             >

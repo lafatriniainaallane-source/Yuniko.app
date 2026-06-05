@@ -129,7 +129,7 @@ export default function Chat() {
                     }`}
                     style={{
                       background: isMe
-                        ? "linear-gradient(135deg, #7C3AED, #4F46E5)"
+                        ? "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)"
                         : "rgba(255,255,255,0.08)",
                     }}
                     data-testid={`msg-bubble-${msg.id}`}
@@ -192,10 +192,10 @@ export default function Chat() {
       >
         <div className="flex items-center gap-2">
           <button data-testid="btn-attach-media">
-            <Image size={22} className="text-purple-400" strokeWidth={1.8} />
+            <Image size={22} style={{ color: "#FF3D9A" }} strokeWidth={1.8} />
           </button>
           <button data-testid="btn-camera-msg">
-            <Camera size={22} className="text-purple-400" strokeWidth={1.8} />
+            <Camera size={22} style={{ color: "#FF3D9A" }} strokeWidth={1.8} />
           </button>
           <div
             className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-full"
@@ -217,14 +217,14 @@ export default function Chat() {
             <button
               onClick={sendMessage}
               className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)", boxShadow: "0 2px 12px rgba(124,58,237,0.4)" }}
+              style={{ background: "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)", boxShadow: "0 2px 12px rgba(255,0,110,0.4)" }}
               data-testid="btn-send"
             >
               <Send size={16} className="text-white ml-0.5" />
             </button>
           ) : (
             <button data-testid="btn-voice-msg">
-              <Mic size={22} className="text-purple-400" strokeWidth={1.8} />
+              <Mic size={22} style={{ color: "#FF3D9A" }} strokeWidth={1.8} />
             </button>
           )}
         </div>

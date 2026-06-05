@@ -30,19 +30,19 @@ export default function StorageSettings() {
         <div className="p-4 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <HardDrive size={16} className="text-purple-400" />
+              <HardDrive size={16} style={{ color: "#FF3D9A" }} />
               <span className="text-white font-semibold text-sm">App Storage</span>
             </div>
             <span className="text-white/50 text-sm">248 MB / 2 GB</span>
           </div>
           <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
-            <div className="h-full rounded-full" style={{ width: "12.4%", background: "linear-gradient(90deg, #7C3AED, #4F46E5)" }} />
+            <div className="h-full rounded-full" style={{ width: "12.4%", background: "linear-gradient(90deg, #FF006E, #8B00FF)" }} />
           </div>
           <div className="flex justify-between mt-3 text-xs text-white/40">
             {[
-              { label: "Cache", size: "124 MB", color: "#8B5CF6" },
-              { label: "Media", size: "96 MB", color: "#6366F1" },
-              { label: "Other", size: "28 MB", color: "#4F46E5" },
+              { label: "Cache", size: "124 MB", color: "#FF006E" },
+              { label: "Media", size: "96 MB", color: "#B054FF" },
+              { label: "Other", size: "28 MB", color: "#8B00FF" },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
@@ -77,7 +77,7 @@ export default function StorageSettings() {
             </div>
             <button
               className="px-3 py-1 rounded-full text-xs font-medium text-white"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+              style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)" }}
               data-testid="btn-download-data"
             >
               Request

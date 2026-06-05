@@ -9,7 +9,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
     <button
       onClick={() => onChange(!value)}
       className="relative w-10 h-6 rounded-full transition-all duration-200"
-      style={{ background: value ? "linear-gradient(135deg, #7C3AED, #4F46E5)" : "rgba(255,255,255,0.15)" }}
+      style={{ background: value ? "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)" : "rgba(255,255,255,0.15)" }}
     >
       <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all duration-200" style={{ left: value ? "calc(100% - 22px)" : "2px" }} />
     </button>

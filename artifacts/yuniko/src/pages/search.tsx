@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Search, TrendingUp, Hash, Users, X } from "lucide-react";
-import { users, posts } from "@/data/mockData";
+import { Search, TrendingUp, Users, X, Hash, Sparkles } from "lucide-react";
+import { users, posts, formatCount } from "@/data/mockData";
 import { t } from "@/lib/i18n";
-import { formatCount } from "@/data/mockData";
 import BottomNav from "@/components/BottomNav";
+
+const GRADIENT = "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)";
 
 const TRENDING_HASHTAGS = [
   { tag: "sunset", posts: 2400000 },
@@ -23,6 +24,12 @@ export default function SearchPage() {
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<Tab>("forYou");
+  const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
+
+  const toggleFollow = (uid: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFollowStates((prev) => ({ ...prev, [uid]: !prev[uid] }));
+  };
 
   const filteredUsers = query
     ? users.filter(
@@ -48,7 +55,7 @@ export default function SearchPage() {
       <header
         className="sticky top-0 z-40 px-4 py-3"
         style={{
-          background: "rgba(13,11,20,0.95)",
+          background: "rgba(13,11,20,0.96)",
           backdropFilter: "blur(20px)",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
@@ -64,7 +71,6 @@ export default function SearchPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchUsers")}
             className="flex-1 bg-transparent text-white/85 text-sm outline-none placeholder:text-white/30"
-            autoFocus
             data-testid="input-search"
           />
           {query && (
@@ -75,15 +81,16 @@ export default function SearchPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex mt-3 gap-1">
+        <div className="flex mt-3 gap-2">
           {tabs.map((tabItem) => (
             <button
               key={tabItem.id}
               onClick={() => setTab(tabItem.id)}
               className="flex-1 py-2 rounded-xl text-sm font-medium transition-all"
               style={{
-                background: tab === tabItem.id ? "linear-gradient(135deg, #7C3AED, #4F46E5)" : "rgba(255,255,255,0.06)",
+                background: tab === tabItem.id ? GRADIENT : "rgba(255,255,255,0.06)",
                 color: tab === tabItem.id ? "white" : "rgba(255,255,255,0.5)",
+                boxShadow: tab === tabItem.id ? "0 2px 10px rgba(255,0,110,0.25)" : "none",
               }}
               data-testid={`search-tab-${tabItem.id}`}
             >
@@ -96,36 +103,41 @@ export default function SearchPage() {
       {/* Search results */}
       {query ? (
         <div>
-          {/* People results */}
           {(tab === "forYou" || tab === "people") && filteredUsers.length > 0 && (
             <div>
               <p className="px-4 pt-4 pb-2 text-white/50 text-xs font-semibold uppercase tracking-wider">{t("people")}</p>
-              {filteredUsers.map((user) => (
-                <button
-                  key={user.id}
-                  onClick={() => setLocation(`/user/${user.id}`)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-                  data-testid={`search-user-${user.id}`}
-                >
-                  <img src={user.avatar} alt={user.displayName} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold text-sm">{user.displayName}</p>
-                    <p className="text-white/50 text-xs">@{user.username} · {formatCount(user.followers)} {t("followers")}</p>
-                  </div>
+              {filteredUsers.map((user) => {
+                const isFollowing = followStates[user.id] ?? user.isFollowing;
+                return (
                   <button
-                    onClick={(e) => e.stopPropagation()}
-                    className="px-4 py-1.5 rounded-full text-xs font-semibold text-white"
-                    style={{ background: user.isFollowing ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+                    key={user.id}
+                    onClick={() => setLocation(`/user/${user.id}`)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-white/5"
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                    data-testid={`search-user-${user.id}`}
                   >
-                    {user.isFollowing ? t("following") : t("follow")}
+                    <img src={user.avatar} alt={user.displayName} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm">{user.displayName}</p>
+                      <p className="text-white/50 text-xs">@{user.username} · {formatCount(user.followers)} {t("followers")}</p>
+                    </div>
+                    <button
+                      onClick={(e) => toggleFollow(user.id, e)}
+                      className="px-4 py-1.5 rounded-full text-xs font-semibold text-white flex-shrink-0"
+                      style={{
+                        background: isFollowing ? "rgba(255,255,255,0.1)" : GRADIENT,
+                        border: isFollowing ? "1px solid rgba(255,255,255,0.15)" : "none",
+                        boxShadow: isFollowing ? "none" : "0 2px 8px rgba(255,0,110,0.3)",
+                      }}
+                    >
+                      {isFollowing ? t("following") : t("follow")}
+                    </button>
                   </button>
-                </button>
-              ))}
+                );
+              })}
             </div>
           )}
 
-          {/* Hashtag results */}
           {(tab === "forYou" || tab === "hashtags") && filteredHashtags.length > 0 && (
             <div>
               <p className="px-4 pt-4 pb-2 text-white/50 text-xs font-semibold uppercase tracking-wider">{t("hashtag")}</p>
@@ -133,15 +145,15 @@ export default function SearchPage() {
                 <button
                   key={h.tag}
                   onClick={() => setLocation(`/hashtag/${h.tag}`)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-white/5"
                   style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
                   data-testid={`search-hashtag-${h.tag}`}
                 >
                   <div
-                    className="w-11 h-11 rounded-full flex items-center justify-center"
-                    style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(79,70,229,0.3))", border: "1px solid rgba(139,92,246,0.3)" }}
+                    className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(255,0,110,0.12)", border: "1px solid rgba(255,0,110,0.25)" }}
                   >
-                    <Hash size={18} className="text-purple-400" />
+                    <Hash size={18} style={{ color: "#FF3D9A" }} />
                   </div>
                   <div>
                     <p className="text-white font-semibold text-sm">#{h.tag}</p>
@@ -153,19 +165,23 @@ export default function SearchPage() {
           )}
 
           {filteredUsers.length === 0 && filteredHashtags.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <Search size={40} className="text-white/20" />
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(255,0,110,0.1)", border: "1px solid rgba(255,0,110,0.2)" }}
+              >
+                <Search size={28} style={{ color: "#FF3D9A" }} />
+              </div>
               <p className="text-white/40 text-sm">{t("noResults")}</p>
             </div>
           )}
         </div>
       ) : (
-        /* Default discover content */
         <div>
           {/* Trending hashtags */}
-          <div className="px-4 pt-4 pb-2">
+          <div className="px-4 pt-5 pb-2">
             <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={16} className="text-purple-400" />
+              <TrendingUp size={16} style={{ color: "#FF3D9A" }} />
               <h2 className="text-white font-semibold text-sm">{t("trending")}</h2>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -174,7 +190,11 @@ export default function SearchPage() {
                   key={h.tag}
                   onClick={() => setLocation(`/hashtag/${h.tag}`)}
                   className="px-3 py-1.5 rounded-full text-sm font-medium"
-                  style={{ background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.25)", color: "#A78BFA" }}
+                  style={{
+                    background: "rgba(255,0,110,0.1)",
+                    border: "1px solid rgba(255,0,110,0.2)",
+                    color: "#FF3D9A",
+                  }}
                   data-testid={`trending-${h.tag}`}
                 >
                   #{h.tag}
@@ -183,43 +203,48 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {/* Trending creators */}
-          <div className="px-4 mt-4 mb-3">
+          {/* Suggested creators */}
+          <div className="px-4 mt-5 mb-3">
             <div className="flex items-center gap-2 mb-3">
-              <Users size={16} className="text-purple-400" />
-              <h2 className="text-white font-semibold text-sm">Trending Creators</h2>
+              <Sparkles size={16} style={{ color: "#FF3D9A" }} />
+              <h2 className="text-white font-semibold text-sm">Suggested Creators</h2>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-              {users.slice(0, 6).map((user) => (
+            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+              {users.slice(0, 8).map((user) => (
                 <button
                   key={user.id}
                   onClick={() => setLocation(`/user/${user.id}`)}
                   className="flex flex-col items-center gap-2 flex-shrink-0"
-                  style={{ minWidth: 72 }}
+                  style={{ minWidth: 68 }}
                   data-testid={`trending-creator-${user.id}`}
                 >
-                  <div
-                    className="w-16 h-16 rounded-full p-[2px]"
-                    style={{ background: "linear-gradient(135deg, #8B5CF6, #4F46E5)" }}
-                  >
-                    <img src={user.avatar} alt={user.displayName} className="w-full h-full rounded-full object-cover" style={{ border: "2px solid #0D0B14" }} />
+                  <div className="w-[62px] h-[62px] rounded-full p-[2px]" style={{ background: GRADIENT }}>
+                    <img
+                      src={user.avatar}
+                      alt={user.displayName}
+                      className="w-full h-full rounded-full object-cover"
+                      style={{ border: "2px solid #0D0B14" }}
+                    />
                   </div>
-                  <span className="text-white/75 text-[11px] text-center truncate max-w-[64px]">{user.displayName}</span>
+                  <span className="text-white/70 text-[11px] text-center truncate w-full">{user.displayName}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Grid discover */}
+          {/* Discover grid */}
           <div className="px-0.5">
             <p className="px-4 py-2 text-white font-semibold text-sm">{t("discover")}</p>
             <div className="grid grid-cols-3 gap-0.5">
-              {posts.map((post, i) => (
+              {posts.slice(0, 12).map((post, i) => (
                 <button
                   key={post.id}
                   onClick={() => setLocation(`/post/${post.id}`)}
-                  className={`overflow-hidden ${i % 5 === 0 ? "col-span-2 row-span-2" : ""}`}
-                  style={{ aspectRatio: i % 5 === 0 ? undefined : "1", height: i % 5 === 0 ? 200 : undefined }}
+                  className={`overflow-hidden ${i % 7 === 0 ? "col-span-2 row-span-2" : ""}`}
+                  style={{
+                    aspectRatio: i % 7 === 0 ? undefined : "1",
+                    height: i % 7 === 0 ? 200 : undefined,
+                  }}
                   data-testid={`discover-post-${post.id}`}
                 >
                   <img src={post.imageUrl} alt={post.caption} className="w-full h-full object-cover" />

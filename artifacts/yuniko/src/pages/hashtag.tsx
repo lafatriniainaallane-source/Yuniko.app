@@ -29,20 +29,20 @@ export default function Hashtag() {
       <div className="px-4 py-6 flex flex-col items-center gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div
           className="w-20 h-20 rounded-full flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(79,70,229,0.3))", border: "2px solid rgba(139,92,246,0.4)" }}
+          style={{ background: "rgba(255,0,110,0.12)", border: "2px solid rgba(255,0,110,0.3)" }}
         >
-          <Hash size={36} className="text-purple-400" />
+          <Hash size={36} style={{ color: "#FF3D9A" }} />
         </div>
         <h2
           className="text-2xl font-bold"
-          style={{ background: "linear-gradient(90deg, #A78BFA, #818CF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
         >
           #{tag}
         </h2>
         <p className="text-white/50 text-sm">{formatCount(totalPosts)} posts</p>
         <button
           className="px-6 py-2 rounded-full text-sm font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)", boxShadow: "0 2px 12px rgba(124,58,237,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 2px 12px rgba(255,0,110,0.4)" }}
         >
           Follow
         </button>

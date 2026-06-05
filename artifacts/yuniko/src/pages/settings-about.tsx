@@ -22,13 +22,13 @@ export default function About() {
       <div className="flex flex-col items-center py-8 gap-2">
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center mb-1"
-          style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)", boxShadow: "0 0 30px rgba(124,58,237,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 0 30px rgba(255,0,110,0.5)" }}
         >
           <span className="text-3xl font-black text-white">Y</span>
         </div>
         <span
           className="text-2xl font-black"
-          style={{ background: "linear-gradient(90deg, #A78BFA, #818CF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
         >
           Yuniko
         </span>
@@ -48,7 +48,7 @@ export default function About() {
             className="flex items-center gap-3 px-4 py-4 rounded-2xl text-left"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
-            <item.icon size={18} className="text-purple-400 flex-shrink-0" />
+            <item.icon size={18} style={{ color: "#FF3D9A" }} className="flex-shrink-0" />
             <span className="flex-1 text-white/80 text-sm">{item.label}</span>
             <ExternalLink size={14} className="text-white/25" />
           </button>

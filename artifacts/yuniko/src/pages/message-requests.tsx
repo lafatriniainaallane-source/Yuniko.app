@@ -59,7 +59,7 @@ export default function MessageRequests() {
                   <button
                     onClick={() => { setLocation(`/chat/${user.id}`); setRequests((prev) => prev.filter((r) => r.id !== req.id)); }}
                     className="flex-1 py-2 rounded-xl text-sm font-semibold text-white"
-                    style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+                    style={{ background: "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)", boxShadow: "0 2px 8px rgba(255,0,110,0.3)" }}
                     data-testid={`btn-accept-request-${req.id}`}
                   >
                     {t("accept")}

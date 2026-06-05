@@ -60,7 +60,7 @@ export default function AddFriends() {
             onClick={() => setTab(tabItem.id)}
             className="flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium"
             style={{
-              background: tab === tabItem.id ? "linear-gradient(135deg, #7C3AED, #4F46E5)" : "rgba(255,255,255,0.07)",
+              background: tab === tabItem.id ? "linear-gradient(135deg, #FF006E, #8B00FF)" : "rgba(255,255,255,0.07)",
               color: tab === tabItem.id ? "white" : "rgba(255,255,255,0.5)",
             }}
             data-testid={`friends-tab-${tabItem.id}`}
@@ -135,7 +135,7 @@ export default function AddFriends() {
                       <button
                         onClick={() => setAcceptedIds((prev) => { const n = new Set(prev); n.add(user.id); return n; })}
                         className="px-4 py-1.5 rounded-full text-sm font-semibold text-white"
-                        style={{ background: acceptedIds.has(user.id) ? "rgba(134,239,172,0.2)" : "linear-gradient(135deg, #7C3AED, #4F46E5)" }}
+                        style={{ background: acceptedIds.has(user.id) ? "rgba(134,239,172,0.2)" : "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: acceptedIds.has(user.id) ? "none" : "0 2px 8px rgba(255,0,110,0.3)" }}
                         data-testid={`btn-accept-${user.id}`}
                       >
                         {acceptedIds.has(user.id) ? "Accepted ✓" : t("accept")}
@@ -244,8 +244,9 @@ function UserRow({
         onClick={onAction}
         className="px-4 py-1.5 rounded-full text-sm font-semibold text-white flex-shrink-0"
         style={{
-          background: isSent ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #7C3AED, #4F46E5)",
+          background: isSent ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #FF006E, #8B00FF)",
           border: isSent ? "1px solid rgba(255,255,255,0.15)" : "none",
+          boxShadow: isSent ? "none" : "0 2px 8px rgba(255,0,110,0.3)",
         }}
         data-testid={`btn-add-${user.id}`}
       >
