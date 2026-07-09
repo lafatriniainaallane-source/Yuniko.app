@@ -2,20 +2,26 @@ import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Heart, MessageCircle, Share2, Bookmark, BadgeCheck, MoreHorizontal, Sparkles, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Post, getUserById, formatCount } from "@/data/mockData";
+import { api, type ApiPost } from "@/lib/api";
 import { t } from "@/lib/i18n";
 
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+
 interface PostCardProps {
-  post: Post;
+  post: ApiPost;
   onOptions?: () => void;
 }
 
 export default function PostCard({ post, onOptions }: PostCardProps) {
   const [, setLocation] = useLocation();
-  const user = getUserById(post.userId);
-  const [liked, setLiked] = useState(post.isLiked);
-  const [saved, setSaved] = useState(post.isSaved);
-  const [likeCount, setLikeCount] = useState(post.likes);
+  const user = post.author;
+  const [liked, setLiked] = useState(post.viewerState.liked);
+  const [saved, setSaved] = useState(post.viewerState.saved);
+  const [likeCount, setLikeCount] = useState(post.counts.likes);
   const [heartBurst, setHeartBurst] = useState(false);
   const [lastTap, setLastTap] = useState(0);
 
@@ -24,6 +30,7 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
   const handleLike = useCallback(() => {
     setLiked((prev) => !prev);
     setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+    void api.postAction(post.id, "like");
   }, [liked]);
 
   const handleDoubleTap = useCallback(() => {
@@ -43,7 +50,7 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
     <div className="relative w-full h-full" data-testid={`post-card-${post.id}`}>
       {/* Background image */}
       <img
-        src={post.imageUrl}
+        src={post.media[0]?.url}
         alt={post.caption}
         className="absolute inset-0 w-full h-full object-cover"
         onClick={handleDoubleTap}
@@ -120,14 +127,14 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
         />
         <ActionBtn
           icon={<MessageCircle size={25} className="text-white" strokeWidth={1.8} />}
-          label={formatCount(post.comments)}
+          label={formatCount(post.counts.comments)}
           onClick={() => setLocation(`/post/${post.id}`)}
           testId="btn-comment"
         />
         <ActionBtn
           icon={<Share2 size={25} className="text-white" strokeWidth={1.8} />}
-          label={formatCount(post.shares)}
-          onClick={() => {}}
+          label={formatCount(post.counts.shares)}
+          onClick={() => void api.postAction(post.id, "share")}
           testId="btn-share"
         />
         <ActionBtn
@@ -138,8 +145,8 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
               strokeWidth={1.8}
             />
           }
-          label={formatCount(post.saves)}
-          onClick={() => setSaved((prev) => !prev)}
+          label={formatCount(post.counts.saves)}
+          onClick={() => { setSaved((prev) => !prev); void api.postAction(post.id, "save"); }}
           testId="btn-save"
           active={saved}
         />
@@ -153,7 +160,7 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
             className="flex-shrink-0"
           >
             <img
-              src={user.avatar}
+              src={user.avatarUrl || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user.displayName)}`}
               alt={user.displayName}
               className="w-9 h-9 rounded-full object-cover"
               style={{
@@ -172,8 +179,8 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
               {user.verified && (
                 <BadgeCheck size={13} className="text-blue-400 fill-blue-400 flex-shrink-0" />
               )}
-              {post.location && (
-                <span className="text-white/55 text-xs">· {post.location}</span>
+              {post.distribution?.stage && (
+                <span className="text-white/55 text-xs">· {post.distribution.stage}</span>
               )}
             </div>
           </div>
@@ -212,7 +219,7 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
           </p>
         )}
         {!post.isSponsored && (
-          <p className="text-white/40 text-xs mt-0.5">{post.timestamp}</p>
+          <p className="text-white/40 text-xs mt-0.5">{new Date(post.createdAt).toLocaleString()}</p>
         )}
       </div>
     </div>
