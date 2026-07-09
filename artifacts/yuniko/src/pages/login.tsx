@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { api, persistSession } from "@/lib/api";
 import logoSrc from "@assets/file_000000003524724399ff06d3685a22e6_1780640550687.png";
 
 const GRADIENT = "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)";
@@ -13,12 +14,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (!email || !password) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
+    const result = mode === "signin"
+      ? await api.login(email, password)
+      : await api.signup({ email: email.includes("@") ? email : undefined, phoneNumber: phoneNumber || undefined, username: username || name.toLowerCase().replace(/[^a-z0-9_]/g, "_"), displayName: name, password });
+    persistSession(result.token);
     setLoading(false);
     setLocation("/");
   };
@@ -106,6 +112,7 @@ export default function LoginPage() {
         {/* Fields */}
         <div className="flex flex-col gap-3 mb-4">
           {mode === "signup" && (
+            <>
             <div
               className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
@@ -118,6 +125,15 @@ export default function LoginPage() {
                 className="flex-1 bg-transparent text-white/90 text-sm outline-none placeholder:text-white/30"
               />
             </div>
+            <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              <Sparkles size={18} className="text-white/40 flex-shrink-0" />
+              <input value={username} onChange={(e) => setUsername(e.target.value)} onBlur={() => username && void api.usernameAvailable(username)} placeholder="Username" className="flex-1 bg-transparent text-white/90 text-sm outline-none placeholder:text-white/30" />
+            </div>
+            <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              <Mail size={18} className="text-white/40 flex-shrink-0" />
+              <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone number" className="flex-1 bg-transparent text-white/90 text-sm outline-none placeholder:text-white/30" />
+            </div>
+            </>
           )}
 
           <div
@@ -217,7 +233,7 @@ export default function LoginPage() {
           ].map(({ label, icon }) => (
             <button
               key={label}
-              onClick={() => setLocation("/")}
+              onClick={async () => { const result = await api.social(label.toLowerCase() as "google" | "apple"); persistSession(result.token); setLocation("/"); }}
               className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
             >
@@ -226,14 +242,6 @@ export default function LoginPage() {
             </button>
           ))}
         </div>
-
-        {/* Guest */}
-        <button
-          onClick={() => setLocation("/")}
-          className="w-full text-center text-white/40 text-sm"
-        >
-          Continue as guest →
-        </button>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Search, UserPlus, Globe, ChevronDown, Bookmark, Share2, Flag, EyeOff, WifiOff, Radio } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { stories, getFeedWithAds } from "@/data/mockData";
+import { api, type ApiPost } from "@/lib/api";
 import StoryAvatar from "@/components/StoryAvatar";
 import PostCard from "@/components/PostCard";
 import BottomNav from "@/components/BottomNav";
@@ -28,7 +28,6 @@ function useOnlineStatus() {
   return isOnline;
 }
 
-const feedItems = getFeedWithAds();
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -36,6 +35,13 @@ export default function Home() {
   const [worldFeedOpen, setWorldFeedOpen] = useState(false);
   const isOnline = useOnlineStatus();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [feedItems, setFeedItems] = useState<ApiPost[]>([]);
+  const [stories, setStories] = useState<any[]>([]);
+
+  useEffect(() => {
+    void api.feed().then((r) => setFeedItems(r.items));
+    void api.stories().then((r) => setStories(r.items));
+  }, []);
 
   return (
     <div
