@@ -3,7 +3,6 @@ import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme";
-import { motion, AnimatePresence } from "framer-motion";
 
 import SplashScreen from "@/components/SplashScreen";
 import Home from "@/pages/home";
@@ -42,29 +41,11 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: false } },
 });
 
-const pageVariants = {
-  initial: { opacity: 0, y: 6 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -6 },
-};
-
-const pageTransition = { duration: 0.16, ease: "easeInOut" as const };
-
 function AnimatedRoutes() {
   const [location] = useLocation();
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location}
-        variants={pageVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        transition={pageTransition}
-        className="w-full min-h-screen"
-        style={{ willChange: "opacity, transform" }}
-      >
+    <div key={location} className="page-enter w-full min-h-screen">
         <Switch>
           {/* Auth */}
           <Route path="/login" component={Login} />
@@ -167,8 +148,7 @@ function AnimatedRoutes() {
           {/* Fallback */}
           <Route component={NotFound} />
         </Switch>
-      </motion.div>
-    </AnimatePresence>
+    </div>
   );
 }
 
