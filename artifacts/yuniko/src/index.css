@@ -1,5 +1,7 @@
+@layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@clerk/themes/shadcn.css";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
@@ -381,6 +383,12 @@
   /* Safe-area padding for notched phones */
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+  /* ─── Clerk: placeholder visibility on dark background ─── */
+  .cl-formFieldInput::placeholder {
+    color: rgba(255, 255, 255, 0.28);
+    opacity: 1;
+  }
 
   /* ─── Page transition: instant slide-in, no opacity change ─── */
   @keyframes page-slide-in {
