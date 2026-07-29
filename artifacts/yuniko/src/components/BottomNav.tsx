@@ -110,13 +110,16 @@ function NavItem({
         >
           {label}
         </span>
-        {active && (
-          <motion.span
-            layoutId="nav-dot"
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-            style={{ background: ACTIVE_COLOR }}
-          />
-        )}
+        {/* Active indicator: CSS transition only — no layoutId to avoid AnimatePresence conflicts */}
+        <span
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+          style={{
+            background: ACTIVE_COLOR,
+            opacity: active ? 1 : 0,
+            transform: `translateX(-50%) scale(${active ? 1 : 0})`,
+            transition: "opacity 0.15s ease, transform 0.15s ease",
+          }}
+        />
       </motion.button>
     </Link>
   );
