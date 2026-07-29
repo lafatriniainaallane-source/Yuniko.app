@@ -7,7 +7,7 @@ const router: IRouter = Router();
 /** Génère un email interne invisible à l'utilisateur */
 function internalEmail(username: string): string {
   const suffix = Math.random().toString(36).slice(2, 8);
-  return `${username}_${suffix}@ynk.internal`;
+  return `${username}.${suffix}@ynk.app`;
 }
 
 /**
