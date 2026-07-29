@@ -1,1 +1,2 @@
 - [Yuniko branding & gradient](yuniko-branding.md) — All purple replaced with pink-purple gradient; User type needs website field.
+- [Clerk React v6 hooks API](clerk-react-v6-hooks.md) — useSignIn returns signals value, not the classic destructurable object; setActive lives on useClerk().

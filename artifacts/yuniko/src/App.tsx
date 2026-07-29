@@ -11,19 +11,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme";
 import {
   ClerkProvider,
-  SignIn,
-  SignUp,
   Show,
   useClerk,
-  useUser,
 } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
-import { shadcn } from "@clerk/themes";
 
 import SplashScreen from "@/components/SplashScreen";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
-import CompleteProfile from "@/pages/complete-profile";
+import CustomSignIn from "@/pages/sign-in";
+import CustomSignUp from "@/pages/sign-up";
 import Notifications from "@/pages/notifications";
 import Create from "@/pages/create";
 import Messages from "@/pages/messages";
@@ -76,90 +73,6 @@ if (!clerkPubKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
 }
 
-// ─── Yuniko-branded Clerk appearance ─────────────────────────────────────────
-
-const clerkAppearance = {
-  theme: shadcn,
-  cssLayerName: "clerk",
-  options: {
-    logoPlacement: "inside" as const,
-    logoLinkUrl: basePath || "/",
-    logoImageUrl: `${window.location.origin}${basePath}/logo.svg`,
-    socialButtonsVariant: "blockButton" as const,
-    socialButtonsPlacement: "top" as const,
-  },
-  variables: {
-    colorPrimary: "#FF006E",
-    colorForeground: "#FFFFFF",
-    colorMutedForeground: "rgba(255,255,255,0.45)",
-    colorDanger: "#FF4455",
-    colorBackground: "#0D0A18",
-    colorInput: "rgba(255,255,255,0.07)",
-    colorInputForeground: "#FFFFFF",
-    colorNeutral: "rgba(255,61,154,0.25)",
-    fontFamily: "inherit",
-    borderRadius: "0.875rem",
-  },
-  elements: {
-    rootBox: "w-full flex justify-center",
-    cardBox:
-      "w-[390px] max-w-full overflow-hidden rounded-2xl shadow-[0_0_60px_rgba(255,0,110,0.12)] border border-[rgba(255,61,154,0.18)] bg-[#0D0A18]",
-    card: "!shadow-none !border-0 !bg-transparent !rounded-none",
-    footer: "!shadow-none !border-0 !bg-transparent !rounded-none",
-    headerTitle: "text-white font-bold text-xl",
-    headerSubtitle: "text-white/45",
-    socialButtonsBlockButtonText: "text-white/80 font-medium",
-    formFieldLabel: "text-white/60 text-sm",
-    footerActionLink: "text-[#FF3D9A] font-semibold hover:text-[#FF006E]",
-    footerActionText: "text-white/35",
-    dividerText: "text-white/25",
-    identityPreviewEditButton: "text-[#FF3D9A]",
-    formFieldSuccessText: "text-emerald-400",
-    alertText: "text-white/80",
-    logoBox: "mx-auto",
-    logoImage: "rounded-xl",
-    socialButtonsBlockButton:
-      "border border-white/10 hover:border-[rgba(255,61,154,0.4)] transition-colors",
-    formButtonPrimary:
-      "bg-gradient-to-r from-[#FF006E] to-[#8B00FF] hover:opacity-90 transition-opacity font-semibold",
-    formFieldInput:
-      "border-white/10 focus:border-[rgba(255,0,110,0.5)] bg-white/[0.06] text-white",
-    footerAction: "border-t border-white/[0.06]",
-    dividerLine: "bg-white/10",
-    alert: "border border-white/10 bg-white/[0.04]",
-    otpCodeFieldInput:
-      "border-white/20 bg-white/[0.06] text-white text-center font-bold",
-    formFieldRow: "mb-0.5",
-    main: "px-6 py-4",
-  },
-};
-
-// ─── Auth page wrappers ───────────────────────────────────────────────────────
-
-function SignInPage() {
-  return (
-    <div className="w-full max-w-[430px] mx-auto min-h-screen bg-background flex flex-col items-center justify-center px-4 py-10">
-      <SignIn
-        routing="path"
-        path={`${basePath}/sign-in`}
-        signUpUrl={`${basePath}/sign-up`}
-      />
-    </div>
-  );
-}
-
-function SignUpPage() {
-  return (
-    <div className="w-full max-w-[430px] mx-auto min-h-screen bg-background flex flex-col items-center justify-center px-4 py-10">
-      <SignUp
-        routing="path"
-        path={`${basePath}/sign-up`}
-        signInUrl={`${basePath}/sign-in`}
-      />
-    </div>
-  );
-}
-
 // ─── Route protection ─────────────────────────────────────────────────────────
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -171,23 +84,6 @@ function Protected({ children }: { children: React.ReactNode }) {
       </Show>
     </>
   );
-}
-
-// After sign-in, redirect users who haven't set a username yet
-function UsernameGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoaded } = useUser();
-  const [location] = useLocation();
-
-  const authPaths = ["/sign-in", "/sign-up", "/complete-profile"];
-  const onAuthPath = authPaths.some((p) => location.startsWith(p));
-
-  if (!isLoaded) return null;
-
-  if (user && !user.publicMetadata?.username && !onAuthPath) {
-    return <Redirect to="/complete-profile" />;
-  }
-
-  return <>{children}</>;
 }
 
 // ─── Cache invalidation on user change ───────────────────────────────────────
@@ -224,24 +120,12 @@ function AnimatedRoutes() {
   const [location] = useLocation();
 
   return (
-    <UsernameGuard>
-      <div key={location} className="page-enter w-full min-h-screen">
+    <div key={location} className="page-enter w-full min-h-screen">
         <Switch>
-          {/* ── Clerk auth routes — paths copied verbatim (/*? required) ── */}
-          <Route path="/sign-in/*?" component={SignInPage} />
-          <Route path="/sign-up/*?" component={SignUpPage} />
-
-          {/* Legacy redirect */}
+          {/* ── Auth ── */}
+          <Route path="/sign-in" component={CustomSignIn} />
+          <Route path="/sign-up" component={CustomSignUp} />
           <Route path="/login">{() => <Redirect to="/sign-in" />}</Route>
-
-          {/* Username setup — shown once after sign-up */}
-          <Route path="/complete-profile">
-            {() => (
-              <Protected>
-                <CompleteProfile />
-              </Protected>
-            )}
-          </Route>
 
           {/* Home: landing for guests, feed for signed-in users */}
           <Route path="/">
@@ -510,8 +394,7 @@ function AnimatedRoutes() {
           {/* ── Fallback ── */}
           <Route component={NotFound} />
         </Switch>
-      </div>
-    </UsernameGuard>
+    </div>
   );
 }
 
@@ -533,23 +416,8 @@ function ClerkProviderWithRoutes() {
     <ClerkProvider
       publishableKey={clerkPubKey}
       proxyUrl={clerkProxyUrl}
-      appearance={clerkAppearance}
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
-      localization={{
-        signIn: {
-          start: {
-            title: "Welcome back",
-            subtitle: "Sign in to your Yuniko account",
-          },
-        },
-        signUp: {
-          start: {
-            title: "Join Yuniko",
-            subtitle: "Create an account and start sharing",
-          },
-        },
-      }}
       routerPush={(to) => setLocation(stripBase(to))}
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >

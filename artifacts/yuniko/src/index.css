@@ -390,6 +390,12 @@
     opacity: 1;
   }
 
+  /* ─── Step transition in sign-up (slides in from right) ─── */
+  @keyframes stepIn {
+    from { transform: translateX(32px); opacity: 0.6; }
+    to   { transform: translateX(0);    opacity: 1;   }
+  }
+
   /* ─── Page transition: instant slide-in, no opacity change ─── */
   @keyframes page-slide-in {
     from { transform: translateX(28px); }
