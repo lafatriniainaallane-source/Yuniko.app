@@ -59,9 +59,15 @@ router.post("/signup", async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const email = internalEmail(username);
 
+    // Mot de passe aléatoire fort pour satisfaire les exigences Clerk
+    // (l'utilisateur ne le connaît pas — l'auth se fait via bcrypt + sign-in token)
+    const clerkPassword =
+      `Ynk!${Math.random().toString(36).slice(2, 10)}${Math.random().toString(36).slice(2, 10).toUpperCase()}9`;
+
     // Créer l'utilisateur Clerk
     const user = await clerkClient.users.createUser({
       emailAddress: [email],
+      password: clerkPassword,
       firstName: name.trim(),
       publicMetadata: {
         username,
