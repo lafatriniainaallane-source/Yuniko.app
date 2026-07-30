@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme";
 import { motion, AnimatePresence } from "framer-motion";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
 
 import SplashScreen from "@/components/SplashScreen";
 import Home from "@/pages/home";
@@ -42,14 +43,12 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: false } },
 });
 
-// Tab-bar root routes switch instantly — no slide animation
 const TAB_ROOTS = new Set(["/", "/notifications", "/create", "/messages", "/profile"]);
 
 function isTabRoot(path: string) {
   return TAB_ROOTS.has(path);
 }
 
-// Slide in from the right (forward) or left (back); 0 = instant tab switch
 const slideVariants = {
   enterForward:  { x: "100%", opacity: 1 },
   enterBack:     { x: "-100%", opacity: 1 },
@@ -62,27 +61,21 @@ const slideVariants = {
 function AnimatedRoutes() {
   const [location] = useLocation();
 
-  // History stack to detect direction
   const historyRef = useRef<string[]>([location]);
   const prevLocationRef = useRef(location);
   const directionRef = useRef<"forward" | "back" | "instant">("instant");
 
-  // Run direction logic synchronously during render so it's ready before AnimatePresence reads it
   if (location !== prevLocationRef.current) {
     const history = historyRef.current;
     const prevIdx = history.slice(0, -1).lastIndexOf(location);
 
-    if (isTabRoot(location)) {
-      // Tab switches: instant, no slide
+    if (isTabRoot(location) || location === "/login") {
       directionRef.current = "instant";
-      // Reset history stack on tab switch — avoids stale back-detection after tab jumps
       historyRef.current = [location];
     } else if (prevIdx !== -1) {
-      // We've been to this page before → going back
       directionRef.current = "back";
       historyRef.current = history.slice(0, prevIdx + 1);
     } else {
-      // New page → going forward
       directionRef.current = "forward";
       historyRef.current = [...history, location];
     }
@@ -92,7 +85,6 @@ function AnimatedRoutes() {
 
   const direction = directionRef.current;
 
-  // Pick enter/exit variants based on direction
   const getInitial = () => {
     if (direction === "instant") return "instant";
     return direction === "forward" ? "enterForward" : "enterBack";
@@ -106,28 +98,16 @@ function AnimatedRoutes() {
   const transitionDuration = direction === "instant" ? 0 : 0.22;
 
   return (
-    // overflow-hidden clips the off-screen sliding page; the fixed bottom-nav sits outside this container
     <div className="relative overflow-hidden" style={{ minHeight: "100dvh" }}>
-      <AnimatePresence
-        mode="popLayout"
-        initial={false}
-        custom={direction}
-      >
+      <AnimatePresence mode="popLayout" initial={false} custom={direction}>
         <motion.div
           key={location}
           variants={slideVariants}
           initial={getInitial()}
           animate="center"
           exit={getExit()}
-          transition={{
-            duration: transitionDuration,
-            ease: [0.25, 0.1, 0.25, 1], // native ease
-          }}
-          style={{
-            width: "100%",
-            minHeight: "100dvh",
-            willChange: direction === "instant" ? "auto" : "transform",
-          }}
+          transition={{ duration: transitionDuration, ease: [0.25, 0.1, 0.25, 1] }}
+          style={{ width: "100%", minHeight: "100dvh", willChange: direction === "instant" ? "auto" : "transform" }}
         >
           <Switch>
             {/* Auth */}
@@ -200,10 +180,7 @@ function AnimatedRoutes() {
                   <div className="text-center">
                     <div
                       className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-                      style={{
-                        background: "linear-gradient(135deg, #FF006E, #8B00FF)",
-                        boxShadow: "0 0 40px rgba(255,0,110,0.4)",
-                      }}
+                      style={{ background: "linear-gradient(135deg, #FF006E, #8B00FF)", boxShadow: "0 0 40px rgba(255,0,110,0.4)" }}
                     >
                       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
@@ -237,25 +214,43 @@ function AnimatedRoutes() {
   );
 }
 
-function Router() {
+// Inner component — has access to AuthProvider context
+function AppContent() {
+  const [splashDone, setSplashDone] = useState(false);
+  const { user, isLoading } = useAuth();
+  const [location, navigate] = useLocation();
+
+  // After splash + auth resolution: redirect if needed
+  useEffect(() => {
+    if (!splashDone || isLoading) return;
+    const onAuthPage = location === "/login";
+    if (!user && !onAuthPage) {
+      navigate("/login");
+    } else if (user && onAuthPage) {
+      navigate("/");
+    }
+  }, [splashDone, isLoading, user, location]);
+
   return (
-    <div className="yuniko-root">
+    <>
+      {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
       <AnimatedRoutes />
-    </div>
+    </>
   );
 }
 
 export default function App() {
-  const [splashDone, setSplashDone] = useState(false);
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
-            <Router />
-          </WouterRouter>
+          <AuthProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <div className="yuniko-root">
+                <AppContent />
+              </div>
+            </WouterRouter>
+          </AuthProvider>
         </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>

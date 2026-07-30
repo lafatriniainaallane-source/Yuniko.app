@@ -5,12 +5,14 @@ import { useTheme } from "@/lib/theme";
 import { currentUser } from "@/data/mockData";
 import { useState } from "react";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/lib/auth-context";
 
 const GRADIENT = "linear-gradient(135deg, #FF006E 0%, #8B00FF 100%)";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
   const { theme, setTheme } = useTheme();
+  const { user: authUser, logout } = useAuth();
   const [showLogout, setShowLogout] = useState(false);
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [lang, setLangState] = useState(getLang());
@@ -298,7 +300,7 @@ export default function Settings() {
                 {t("cancel")}
               </button>
               <button
-                onClick={() => { setShowLogout(false); setLocation("/login"); }}
+                onClick={() => { setShowLogout(false); logout(); setLocation("/login"); }}
                 className="flex-1 py-4 text-red-400 font-semibold text-sm"
                 data-testid="btn-confirm-logout"
               >
