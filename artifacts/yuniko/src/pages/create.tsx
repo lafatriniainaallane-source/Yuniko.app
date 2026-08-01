@@ -3,11 +3,13 @@ import { useLocation } from "wouter";
 import { X, Image, Video, MapPin, Hash, Globe, Layers, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { t } from "@/lib/i18n";
-import { currentUser } from "@/data/mockData";
+import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import BottomNav from "@/components/BottomNav";
 
 export default function Create() {
   const [, setLocation] = useLocation();
+  const { user, token } = useAuth();
   const [caption, setCaption] = useState("");
   const [isWorldFeed, setIsWorldFeed] = useState(true);
   const [isAddToStory, setIsAddToStory] = useState(false);
@@ -15,12 +17,32 @@ export default function Create() {
   const [locationText, setLocationText] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [posted, setPosted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
-  const handlePost = () => {
-    if (!caption && !selectedMedia) return;
-    setPosted(true);
-    setTimeout(() => setLocation("/"), 1400);
+  const attachMediaUrl = (type: "image" | "video") => {
+    const url = window.prompt(`Paste a production media URL for this ${type}`);
+    if (url?.trim()) setSelectedMedia(url.trim());
+  };
+
+  const handlePost = async () => {
+    if ((!caption.trim() && !selectedMedia) || !token) return;
+    setError(null);
+    try {
+      if (isAddToStory && selectedMedia) {
+        await api.createStory(token, { mediaUrl: selectedMedia, caption, mediaType: "image" });
+      } else {
+        await api.createPost(token, {
+          caption: [caption.trim(), locationText && `📍 ${locationText}`, hashtags].filter(Boolean).join("\n"),
+          media: selectedMedia ? [{ type: "image", url: selectedMedia, alt: caption.trim() || "Yuniko post" }] : [],
+          visibility: isWorldFeed ? "world" : "followers",
+        });
+      }
+      setPosted(true);
+      setTimeout(() => setLocation("/"), 900);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not publish your post");
+    }
   };
 
   if (posted) {
@@ -88,13 +110,13 @@ export default function Create() {
         {/* User row + caption */}
         <div className="flex gap-3 mb-4">
           <img
-            src={currentUser.avatar}
-            alt={currentUser.displayName}
+            src={user?.avatarUrl || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user?.displayName || "Yuniko")}`}
+            alt={user?.displayName || "Your profile"}
             className="w-10 h-10 rounded-full object-cover flex-shrink-0"
             style={{ boxShadow: "0 0 0 2px rgba(255,61,154,0.5)" }}
           />
           <div className="flex-1">
-            <p className="text-white font-semibold text-sm mb-1.5">{currentUser.username}</p>
+            <p className="text-white font-semibold text-sm mb-1.5">@{user?.username}</p>
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
@@ -130,7 +152,7 @@ export default function Create() {
         <div className="flex gap-3 mb-6">
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedMedia(`https://picsum.photos/seed/${Date.now()}/600/400`)}
+            onClick={() => attachMediaUrl("image")}
             className="flex-1 py-4 rounded-2xl flex flex-col items-center gap-2"
             style={{ background: "rgba(255,0,110,0.08)", border: "1px solid rgba(255,0,110,0.25)" }}
             data-testid="btn-add-photo"
@@ -140,7 +162,7 @@ export default function Create() {
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => setShowVideoModal(true)}
+            onClick={() => attachMediaUrl("video")}
             className="flex-1 py-4 rounded-2xl flex flex-col items-center gap-2"
             style={{ background: "rgba(139,0,255,0.08)", border: "1px solid rgba(139,0,255,0.25)" }}
             data-testid="btn-add-video"
@@ -191,6 +213,8 @@ export default function Create() {
         </div>
       </div>
 
+      {error && <p className="px-4 pb-2 text-sm text-red-300">{error}</p>}
+
       <BottomNav />
 
       {/* Video not available modal */}
@@ -224,9 +248,9 @@ export default function Create() {
               >
                 <AlertCircle size={28} style={{ color: "#FF3D9A" }} />
               </div>
-              <h3 className="text-white font-bold text-base mb-2">Not Available Yet</h3>
+              <h3 className="text-white font-bold text-base mb-2">Media upload</h3>
               <p className="text-white/55 text-sm leading-relaxed mb-5">
-                Video uploads are coming soon. Stay tuned for updates! 🎬
+                Paste or upload-ready media URLs can be attached from storage-backed providers. Native capture will use the same publishing API.
               </p>
               <motion.button
                 whileTap={{ scale: 0.95 }}
