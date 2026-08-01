@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Search, UserPlus, Globe, ChevronDown, Bookmark, Share2, Flag, EyeOff, WifiOff, Radio } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { stories, getFeedWithAds } from "@/data/mockData";
+import { yunikoApi, type FeedPost, type StoryItem } from "@/lib/api";
 import StoryAvatar from "@/components/StoryAvatar";
 import PostCard from "@/components/PostCard";
 import BottomNav from "@/components/BottomNav";
@@ -28,14 +28,30 @@ function useOnlineStatus() {
   return isOnline;
 }
 
-const feedItems = getFeedWithAds();
-
 export default function Home() {
   const [, setLocation] = useLocation();
   const [optionsPostId, setOptionsPostId] = useState<string | null>(null);
   const [worldFeedOpen, setWorldFeedOpen] = useState(false);
   const isOnline = useOnlineStatus();
+  const [feedItems, setFeedItems] = useState<FeedPost[]>([]);
+  const [storyItems, setStoryItems] = useState<StoryItem[]>([]);
+  const [feedError, setFeedError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([yunikoApi.feed(30), yunikoApi.stories()])
+      .then(([posts, liveStories]) => {
+        if (!active) return;
+        setFeedItems(posts);
+        setStoryItems(liveStories);
+        setFeedError(null);
+      })
+      .catch((error) => {
+        if (active) setFeedError(error instanceof Error ? error.message : "Unable to load Yuniko feed");
+      });
+    return () => { active = false; };
+  }, []);
 
   return (
     <div
@@ -174,11 +190,11 @@ export default function Home() {
             </div>
             <span className="text-white/60 text-[10px] font-medium">Go Live</span>
           </button>
-          {stories.map((story) => (
+          {storyItems.map((story) => (
             <StoryAvatar
               key={story.id}
-              userId={story.userId}
-              viewed={story.viewed}
+              userId={String(story.authorId)}
+              viewed={false}
             />
           ))}
         </div>
@@ -219,6 +235,12 @@ export default function Home() {
         }}
         data-testid="posts-feed"
       >
+        {feedError && (
+          <div className="px-6 py-10 text-center text-white/60 text-sm">{feedError}</div>
+        )}
+        {!feedError && feedItems.length === 0 && (
+          <div className="px-6 py-10 text-center text-white/60 text-sm">Follow creators or publish the first Yuniko post to start your World Feed.</div>
+        )}
         {feedItems.map((post) => (
           <div
             key={post.id}
@@ -233,14 +255,12 @@ export default function Home() {
           >
             <div className="relative w-full h-full rounded-[20px] overflow-hidden"
               style={{
-                boxShadow: post.isSponsored
-                  ? "0 4px 24px rgba(255,0,110,0.18)"
-                  : "0 2px 16px rgba(0,0,0,0.4)",
+                boxShadow: "0 2px 16px rgba(0,0,0,0.4)",
               }}
             >
               <PostCard
                 post={post}
-                onOptions={post.isSponsored ? undefined : () => setOptionsPostId(post.id)}
+                onOptions={() => setOptionsPostId(String(post.id))}
               />
             </div>
           </div>
