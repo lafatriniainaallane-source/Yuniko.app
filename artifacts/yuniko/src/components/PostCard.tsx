@@ -1,30 +1,49 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, Bookmark, BadgeCheck, MoreHorizontal, Sparkles, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, BadgeCheck, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Post, getUserById, formatCount } from "@/data/mockData";
+import { formatCount } from "@/data/mockData";
+import { yunikoApi, type FeedPost } from "@/lib/api";
 import { t } from "@/lib/i18n";
 
 interface PostCardProps {
-  post: Post;
+  post: FeedPost;
   onOptions?: () => void;
 }
 
 export default function PostCard({ post, onOptions }: PostCardProps) {
   const [, setLocation] = useLocation();
-  const user = getUserById(post.userId);
-  const [liked, setLiked] = useState(post.isLiked);
-  const [saved, setSaved] = useState(post.isSaved);
-  const [likeCount, setLikeCount] = useState(post.likes);
+  const user = post.author;
+  const [liked, setLiked] = useState(Boolean(post.viewer?.liked));
+  const [saved, setSaved] = useState(Boolean(post.viewer?.saved));
+  const [likeCount, setLikeCount] = useState(post.viralScore);
   const [heartBurst, setHeartBurst] = useState(false);
   const [lastTap, setLastTap] = useState(0);
+  const [following, setFollowing] = useState(false);
 
   if (!user) return null;
 
   const handleLike = useCallback(() => {
     setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  }, [liked]);
+    const next = !liked;
+    setLikeCount((prev) => (liked ? Math.max(0, prev - 1) : prev + 1));
+    void yunikoApi.engagePost(post.id, { liked: next, saved, watchTimeMs: 3000 });
+  }, [liked, post.id, saved]);
+
+  const handleShare = useCallback(() => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    void yunikoApi.engagePost(post.id, { liked, saved, shared: true });
+    if (navigator.share) {
+      void navigator.share({ title: "Yuniko", text: post.caption, url });
+      return;
+    }
+    void navigator.clipboard?.writeText(url);
+  }, [liked, post.caption, post.id, saved]);
+
+  const handleFollow = useCallback(() => {
+    setFollowing(true);
+    void yunikoApi.follow(user.id);
+  }, [user.id]);
 
   const handleDoubleTap = useCallback(() => {
     const now = Date.now();
@@ -43,8 +62,8 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
     <div className="relative w-full h-full" data-testid={`post-card-${post.id}`}>
       {/* Background image */}
       <img
-        src={post.imageUrl}
-        alt={post.caption}
+        src={post.media[0]?.url}
+        alt={post.caption || "Yuniko post"}
         className="absolute inset-0 w-full h-full object-cover"
         onClick={handleDoubleTap}
         loading="lazy"
@@ -65,17 +84,8 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
         }}
       />
 
-      {/* Sponsored badge */}
-      {post.isSponsored && (
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-          style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.18)" }}>
-          <Sparkles size={11} style={{ color: "#FF3D9A" }} />
-          <span className="text-white/90 text-[11px] font-semibold tracking-wide">Sponsored</span>
-        </div>
-      )}
-
       {/* More options button */}
-      {onOptions && !post.isSponsored && (
+      {onOptions && (
         <motion.button
           whileTap={{ scale: 0.88 }}
           className="absolute top-3 right-3 p-2 rounded-full"
@@ -120,14 +130,14 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
         />
         <ActionBtn
           icon={<MessageCircle size={25} className="text-white" strokeWidth={1.8} />}
-          label={formatCount(post.comments)}
+          label="Comment"
           onClick={() => setLocation(`/post/${post.id}`)}
           testId="btn-comment"
         />
         <ActionBtn
           icon={<Share2 size={25} className="text-white" strokeWidth={1.8} />}
-          label={formatCount(post.shares)}
-          onClick={() => {}}
+          label="Share"
+          onClick={handleShare}
           testId="btn-share"
         />
         <ActionBtn
@@ -138,8 +148,8 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
               strokeWidth={1.8}
             />
           }
-          label={formatCount(post.saves)}
-          onClick={() => setSaved((prev) => !prev)}
+          label="Save"
+          onClick={() => { const next = !saved; setSaved(next); void yunikoApi.engagePost(post.id, { liked, saved: next }); }}
           testId="btn-save"
           active={saved}
         />
@@ -153,7 +163,7 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
             className="flex-shrink-0"
           >
             <img
-              src={user.avatar}
+              src={user.avatarUrl ?? "/favicon.svg"}
               alt={user.displayName}
               className="w-9 h-9 rounded-full object-cover"
               style={{
@@ -172,34 +182,21 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
               {user.verified && (
                 <BadgeCheck size={13} className="text-blue-400 fill-blue-400 flex-shrink-0" />
               )}
-              {post.location && (
-                <span className="text-white/55 text-xs">· {post.location}</span>
-              )}
+
             </div>
           </div>
-          {!user.isFollowing && !post.isSponsored && (
+          {user.id !== post.authorId && (
             <motion.button
               whileTap={{ scale: 0.93 }}
+              onClick={handleFollow}
+              disabled={following}
               className="px-3.5 py-1 rounded-full text-xs font-semibold text-white flex-shrink-0"
               style={{
                 background: "linear-gradient(135deg, #FF006E, #8B00FF)",
                 boxShadow: "0 2px 12px rgba(255,0,110,0.35)",
               }}
             >
-              {t("follow")}
-            </motion.button>
-          )}
-          {post.isSponsored && post.sponsorCta && (
-            <motion.button
-              whileTap={{ scale: 0.93 }}
-              className="px-3 py-1 rounded-full text-xs font-semibold text-white flex-shrink-0 flex items-center gap-1"
-              style={{
-                background: "linear-gradient(135deg, #FF006E, #8B00FF)",
-                boxShadow: "0 2px 12px rgba(255,0,110,0.35)",
-              }}
-            >
-              <ExternalLink size={10} />
-              {post.sponsorCta}
+              {following ? "Following" : t("follow")}
             </motion.button>
           )}
         </div>
@@ -211,9 +208,7 @@ export default function PostCard({ post, onOptions }: PostCardProps) {
             {post.hashtags.slice(0, 3).join(" ")}
           </p>
         )}
-        {!post.isSponsored && (
-          <p className="text-white/40 text-xs mt-0.5">{post.timestamp}</p>
-        )}
+        <p className="text-white/40 text-xs mt-0.5">{new Date(post.createdAt).toLocaleDateString()}</p>
       </div>
     </div>
   );
